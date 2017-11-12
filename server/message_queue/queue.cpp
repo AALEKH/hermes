@@ -28,16 +28,17 @@
 */
 #include <stdio.h>
 #include <fstream>
-	// #include <string>
+#include <string>
 #include <sstream>
-// #include <iostream>
 #include <iostream>
+#include <stdio.h>
+#include <ctype.h>
 #include "queue.h"
 
 
 // Storing queue message to file system by appending or creating file
 
-void queue::file_system_store(std::string filename, std::string message) {
+void MessageQueue::file_system_store(std::string filename, std::string message) {
 	std::ofstream outfile;
 	outfile.open(filename, std::ios_base::app);
 	outfile << message << std::endl; // Appends new line to start for next message
@@ -45,15 +46,26 @@ void queue::file_system_store(std::string filename, std::string message) {
 
 // Insert's a new message for queue channel
 
-void queue::insert_message_to_queue(std::string channel, std::string message) {
+void MessageQueue::insert_message_to_queue(std::string channel, std::string message) {
 	std::string filename = channel + ".txt";
 	inmemory_queue[channel].push(message);
-	// file_system_store(filename, message); // Don't store yet
+	file_system_store(filename, message); // Don't store yet
+}
+
+std::string MessageQueue::get_Element(std::string channel) {
+	std::string element = inmemory_queue[channel].front();
+	inmemory_queue[channel].pop();
+	return element;
+}
+
+int MessageQueue::select_operation(std::string operation) {
+	if(operation[0] == 'P' || operation[0] == 'p') return 1;
+	return 0;
 }
 
 // Dump existing queue sequence to file over file storage
 
-void queue::dump_queue_to_file() {
+void MessageQueue::dump_queue_to_file() {
 	std::map<std::string, std::queue<std::string> > mymap;
 	std::string filename;
 	for (std::map<std::string, std::queue<std::string> >::iterator it=mymap.begin(); it!=mymap.end(); ++it){
@@ -79,7 +91,7 @@ void queue::dump_queue_to_file() {
 
 /// Read to Vector from file
 
-std::map<std::string, std::queue<std::string> > queue::inmemory_queue_daemon(std::string channel) {
+std::map<std::string, std::queue<std::string> > MessageQueue::inmemory_queue_daemon(std::string channel) {
 
 	std::string S;
 	std::string filename = channel + ".txt";
@@ -94,7 +106,7 @@ std::map<std::string, std::queue<std::string> > queue::inmemory_queue_daemon(std
 
 /// Funtion to map file to line number write mapping, this will run as a daemon to remove deleted lines in the end
 
-std::vector<std::string> queue::file_to_line_map(std::string filename) {
+std::vector<std::string> MessageQueue::file_to_line_map(std::string filename) {
 
 	std::vector<std::vector<std::string> >     data;
 

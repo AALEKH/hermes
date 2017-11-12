@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "queue.h"
 #include "thread.h"
 #include "wqueue.h"
 #include "tcpacceptor.h"
@@ -126,8 +127,10 @@ class ConnectionHandler : public Thread
         // available to process.
         json object;
         json::string_t value;
+        std::string return_message;
         const char *s1;
         json j;
+        MessageQueue* que;
         for (int i = 0;; i++) {
             printf("thread %lu, loop %d - waiting for item...\n", 
                    (long unsigned int)self(), i);
@@ -140,7 +143,7 @@ class ConnectionHandler : public Thread
             // closed
             char input[2048];
             int len;
-            while ((len = stream->receive(input, sizeof(input)-1)) > 0 ){
+            while ((len = stream->receive(input, sizeof(input)-1)) > 0 ) {
                 //
                 //
                 // Lot of Important stuff goes on here
@@ -151,11 +154,21 @@ class ConnectionHandler : public Thread
 
                 std::cout << sizeof(value) << "\n\n\n" << std::endl;
                 auto j3 = json::parse(value);
+                std::string channel = j3["channel"].get<std::string>();
+                std::string operation = j3["operation"].get<std::string>();
                 std::string message = j3["message"][0].dump();
-                json j2 = json::parse(message);
-                std::cout << "Key: " << j2["key"].get<std::string>() << " Value: " << j2["value"].get<std::string>() << " Just printed this !! " << std::endl;
+
+                if(que->select_operation(operation)) {
+                    que->insert_message_to_queue(channel, message);
+                    return_message = "Successfully Inserted";
+                } else {
+                    return_message = que->get_Element(channel);
+                }
+
+                // json j2 = json::parse(message);
+                // std::cout << "Key: " << j2["key"].get<std::string>() << " Value: " << j2["value"].get<std::string>() << " Just printed this !! " << std::endl;
                 memset(&input[0], 0, sizeof(input)); // Removing elements of array 'input'
-                std::string word = message; // get<std::string>() to convert to string type
+                std::string word = return_message; // get<std::string>() to convert to string type
                 strcpy(input, word.c_str());
                 stream->send(input, sizeof(input));
                 printf("thread %lu, echoed '%s' back to the client\n", 
@@ -168,6 +181,7 @@ class ConnectionHandler : public Thread
             }
             delete item; 
         }
+        delete que;
 
         // Should never get here
         return NULL;
