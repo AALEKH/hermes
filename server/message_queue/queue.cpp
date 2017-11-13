@@ -52,22 +52,17 @@ void MessageQueue::file_system_store(std::string filename, std::string message) 
 
 void MessageQueue::insert_message_to_queue(std::string channel, std::string message) {
 	std::string filename = channel + ".txt";
-	std::cout << filename << std::endl;
 	inmemory_queue[channel].push(message);
-	std::cout << "Here it is !!!" << std::endl;
-	std::cout << "Element Inserted here is: " << channel  << " :~ "<< inmemory_queue[channel].front() << std::endl;
 	file_system_store(filename, message); // Don't store yet
 }
 
 std::string MessageQueue::get_Element(std::string channel) {
 	std::string element = inmemory_queue[channel].front();
-	std::cout << "Element Received here is: " << element << std::endl;
 	inmemory_queue[channel].pop();
 	return element;
 }
 
 int MessageQueue::select_operation(std::string operation) {
-	std::cout << "Operation is: " << operation << std::endl;
 	if(operation[0] == 'P' || operation[0] == 'p') return 1;
 	return 0;
 }
