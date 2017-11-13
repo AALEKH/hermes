@@ -20,6 +20,7 @@
    limitations under the License.
 */
 
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -44,7 +45,8 @@ int main(int argc, char** argv)
 
         string hello = "{\"operation\": \"get\", \"bucket\": \"rogue1\", \"key\": \"force2\", \"value\": \"with me\"}";
   
-        string complete_message = "{\"channel\": \"test\", \"message\": ["+ hello + "]}";
+        string complete_message = "{\"channel\": \"test\", \"operation\": \"Post\", \"message\": ["+ hello + "]}";
+        std::cout << "Complete Message is: " << complete_message << std::endl;
         stream->send(complete_message.c_str(), complete_message.size());
         printf("sent - %s\n", complete_message.c_str());
         len = stream->receive(line, sizeof(line));

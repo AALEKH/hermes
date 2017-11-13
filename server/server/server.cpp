@@ -152,16 +152,19 @@ class ConnectionHandler : public Thread
                 input[len] = NULL;
                 value = std::string(input);
 
-                std::cout << sizeof(value) << "\n\n\n" << std::endl;
+                std::cout << value  << "\n\n\n" << std::endl;
                 auto j3 = json::parse(value);
                 std::string channel = j3["channel"].get<std::string>();
+                // std::cout << value  << "\n\n\n" << std::endl;
                 std::string operation = j3["operation"].get<std::string>();
                 std::string message = j3["message"][0].dump();
 
                 if(que->select_operation(operation)) {
+                    std::cout << "Select Operation One" << channel << message << std::endl;
                     que->insert_message_to_queue(channel, message);
                     return_message = "Successfully Inserted";
                 } else {
+                    std::cout << "Select Operation Two" << std::endl;
                     return_message = que->get_Element(channel);
                 }
 

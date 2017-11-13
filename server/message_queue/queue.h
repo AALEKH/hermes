@@ -36,23 +36,21 @@
 #include <string>
 
 class MessageQueue {
-  public:
-    MessageQueue();
-    virtual ~MessageQueue();
+	public:
 
-    void file_system_store(std::string, std::string);
-    void insert_message_to_queue(std::string, std::string);
-    void dump_queue_to_file();
-    std::string get_Element(std::string);
-    int select_operation(std::string);
-    // void delete_File(std::string); /// Work on remove all file method
-    std::map<std::string, std::queue<std::string> > inmemory_queue_daemon(std::string);
-    std::vector<std::string> file_to_line_map(std::string);
-        
-  private:
-    
-	// Master map storing queue for each channel (used here as key)
-	std::map<std::string, std::queue<std::string> > inmemory_queue;
+    	MessageQueue();
+    	virtual ~MessageQueue();
+    	void file_system_store(std::string, std::string);
+    	void insert_message_to_queue(std::string, std::string);
+    	void dump_queue_to_file();
+    	std::string get_Element(std::string);
+    	int select_operation(std::string);
+    	// void delete_File(std::string); /// Work on remove all file method
+    	std::map<std::string, std::queue<std::string> > inmemory_queue_daemon(std::string);
+    	std::vector<std::string> file_to_line_map(std::string);
+    private:
+    	// Master map storing queue for each channel (used here as key)
+		std::map<std::string, std::queue<std::string> > inmemory_queue;
 
 };
 
