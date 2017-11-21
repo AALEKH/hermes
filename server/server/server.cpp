@@ -80,7 +80,6 @@ class SynchronizedFile {
             std::time_t result = std::time(nullptr);
             char *foo = std::asctime(std::gmtime(&result));
             foo[strlen(foo) - 1] = 0;
-            // std::cout << std::asctime(std::gmtime(&result)) << " hahaha "<< result << " seconds since the Epoch\n";
             myfile << foo << " |~| " << result << " |~| " << situationId << " |~| "<<" seconds since the Epoch\n";
             myfile.close();
         }
@@ -142,20 +141,15 @@ class ConnectionHandler : public Thread
             char input[4096];
             int len;
             while ((len = stream->receive(input, sizeof(input)-1)) > 0 ) {
-                //
-                //
-                // Lot of Important stuff goes on here
-                //
-                //
+////////////////////////////////////
+
                 // Optimise it, currently it read's file for each iteration which isn't good at all
                 que->load_map();
                 input[len] = NULL;
                 value = std::string(input);
 
-                std::cout << value  << "\n\n\n" << std::endl;
                 auto j3 = json::parse(value);
                 std::string channel = j3["channel"].get<std::string>();
-                // std::cout << value  << "\n\n\n" << std::endl;
                 std::string operation = j3["operation"].get<std::string>();
                 std::string message = j3["message"][0].dump();
 
@@ -165,7 +159,7 @@ class ConnectionHandler : public Thread
                 } else {
                     return_message = que->get_Element(channel);
                     que->dump_map();
-                    que->load_map();
+                    // que->load_map();
                 }
                 memset(&input[0], 0, sizeof(input)); // Removing elements of array 'input'
                 std::string word = return_message; // get<std::string>() to convert to string type
@@ -173,11 +167,7 @@ class ConnectionHandler : public Thread
                 stream->send(input, sizeof(input));
                 printf("thread %lu, echoed '%s' back to the client\n", 
                        (long unsigned int)self(), input);
-                //
-                //
-                // Lot of Important stuff goes on here
-                //
-                //
+///////////////////////////////////////////
             }
             delete item; 
         }
