@@ -46,6 +46,7 @@
 using namespace nlohmann;
 using namespace std;
 // using names
+std::mutex mutex_x;
 
 struct StorageObject
 {
@@ -64,6 +65,29 @@ void process(const string& key, const string& value){
         time_object_creation
     };
     
+}
+
+std::string process_Queue_Server(MessageQueue* que, std::string value, char input[4096]) {
+    
+    // For automatic management of locks
+    std::lock_guard<std::mutex> guard(mutex_x);
+
+    std::string return_message, message, channel, operation, word;
+
+    auto j3 = json::parse(value);
+    channel = j3["channel"].get<std::string>();
+    operation = j3["operation"].get<std::string>();
+
+    if(que->select_operation(operation)) {
+        message = j3["message"][0].dump();
+        que->insert_message_to_queue(channel, message);
+        return_message = "Successfully Inserted";
+    } else {
+        return_message = que->get_Element(channel);
+        que->dump_map();
+    }
+    memset(&input[0], 0, sizeof(input)); // Removing elements of array 'input'
+    return return_message; 
 }
 
 class SynchronizedFile {
@@ -125,7 +149,7 @@ class ConnectionHandler : public Thread
 
         json object;
         json::string_t value;
-        std::string return_message;
+        std::string return_message, message, channel, operation, word;
         const char *s1;
         json j;
         MessageQueue* que = new MessageQueue();
@@ -148,24 +172,12 @@ class ConnectionHandler : public Thread
                 input[len] = NULL;
                 value = std::string(input);
 
-                auto j3 = json::parse(value);
-                std::string channel = j3["channel"].get<std::string>();
-                std::string operation = j3["operation"].get<std::string>();
-                std::string message = j3["message"][0].dump();
-
-                if(que->select_operation(operation)) {
-                    que->insert_message_to_queue(channel, message);
-                    return_message = "Successfully Inserted";
-                } else {
-                    return_message = que->get_Element(channel);
-                    que->dump_map();
-                    // que->load_map();
-                }
-                memset(&input[0], 0, sizeof(input)); // Removing elements of array 'input'
-                std::string word = return_message; // get<std::string>() to convert to string type
+                // Where stuff happens
+                word = process_Queue_Server(que, value, input) ;
                 strcpy(input, word.c_str());
                 stream->send(input, sizeof(input));
-                printf("thread %lu, echoed '%s' back to the client\n", 
+                // mu.unlock();
+                printf("thread %lu, echoed '%s' back to the Sender\n", 
                        (long unsigned int)self(), input);
 ///////////////////////////////////////////
             }
