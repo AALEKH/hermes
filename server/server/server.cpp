@@ -130,7 +130,6 @@ class ConnectionHandler : public Thread
         const char *s1;
         json j;
         MessageQueue* que = new MessageQueue();
-        que->load_map();
         for (int i = 0;; i++) {
             printf("thread %lu, loop %d - waiting for item...\n", 
                    (long unsigned int)self(), i);
@@ -140,7 +139,7 @@ class ConnectionHandler : public Thread
             TCPStream* stream = item->getStream();
 
 
-            char input[2048];
+            char input[4096];
             int len;
             while ((len = stream->receive(input, sizeof(input)-1)) > 0 ) {
                 //
@@ -148,6 +147,8 @@ class ConnectionHandler : public Thread
                 // Lot of Important stuff goes on here
                 //
                 //
+                // Optimise it, currently it read's file for each iteration which isn't good at all
+                que->load_map();
                 input[len] = NULL;
                 value = std::string(input);
 
@@ -163,6 +164,8 @@ class ConnectionHandler : public Thread
                     return_message = "Successfully Inserted";
                 } else {
                     return_message = que->get_Element(channel);
+                    que->dump_map();
+                    que->load_map();
                 }
                 memset(&input[0], 0, sizeof(input)); // Removing elements of array 'input'
                 std::string word = return_message; // get<std::string>() to convert to string type

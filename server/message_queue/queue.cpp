@@ -85,7 +85,6 @@ int MessageQueue::rename_files (std::string c_name) {
 void MessageQueue::delete_files (std::string filename) {
 
 	std::string delete_element = "../../infile/" + filename+ ".txt";
-	// std::cout << delete_element << std::endl;
 	if( remove(delete_element.c_str()) != 0 )
     	perror( "Error deleting file" );
   	else
@@ -103,6 +102,7 @@ void MessageQueue::file_system_store(std::string filename, std::string message) 
 void MessageQueue::insert_message_to_queue(std::string channel, std::string message) {
 	std::string filename = "../../infile/" + channel + ".txt";
 	inmemory_queue[channel].push(message);
+	/// This isn't good, we need to store it just once when the system shut's down. TODO: Optimize it
 	file_system_store(filename, message); // Don't store yet
 }
 
@@ -113,7 +113,6 @@ std::string MessageQueue::get_Element(std::string channel) {
 }
 
 int MessageQueue::select_operation(std::string operation) {
-	// std::cout << "Select Operation: " << operation << std::endl;
 	return ((operation[0] == 'P') || (operation[0] == 'p'));
 }
 
@@ -125,9 +124,7 @@ void MessageQueue::dump_queue_to_file() {
 	for (std::map<std::string, std::queue<std::string> >::iterator it=inmemory_queue.begin(); it!=inmemory_queue.end(); ++it){
 		filename = "../../infile/" + it->first + ".temporary.txt";
 		while (!it->second.empty()) {
-			// std::cout << "Iterat" << it->second.front() << std::endl;
 		    file_system_store(filename, it->second.front());
-		    // std::cout << it->second.size() <<std::endl;
 		    it->second.pop();
 		}
 	}
@@ -150,16 +147,16 @@ std::map<std::string, std::queue<std::string> > MessageQueue::inmemory_queue_dae
 void MessageQueue::load_map() {
 	std::vector<std::string> files = file_names();
 	for(int i = 0; i < files.size(); i++) {
-		inmemory_queue_daemon(files[i]);
+		this->inmemory_queue_daemon(files[i]);
 	}
 }
 
 void MessageQueue::dump_map() { // This function is to dump all data
 	std::string filename;
-	dump_queue_to_file();
+	this->dump_queue_to_file();
 	for (std::map<std::string, std::queue<std::string> >::iterator it=inmemory_queue.begin(); it!=inmemory_queue.end(); ++it){
-		delete_files(it->first);
-		rename_files(it->first);
+		this->delete_files(it->first);
+		this->rename_files(it->first);
 	}
 }
 
