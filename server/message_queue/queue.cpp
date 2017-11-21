@@ -85,6 +85,7 @@ int MessageQueue::rename_files (std::string c_name) {
 void MessageQueue::delete_files (std::string filename) {
 
 	std::string delete_element = "../../infile/" + filename+ ".txt";
+	// std::cout << delete_element << std::endl;
 	if( remove(delete_element.c_str()) != 0 )
     	perror( "Error deleting file" );
   	else
@@ -112,8 +113,8 @@ std::string MessageQueue::get_Element(std::string channel) {
 }
 
 int MessageQueue::select_operation(std::string operation) {
-	if(operation[0] == 'P' || operation[0] == 'p') return 1;
-	return 0;
+	// std::cout << "Select Operation: " << operation << std::endl;
+	return ((operation[0] == 'P') || (operation[0] == 'p'));
 }
 
 // Dump existing queue sequence to file over file storage
@@ -124,7 +125,9 @@ void MessageQueue::dump_queue_to_file() {
 	for (std::map<std::string, std::queue<std::string> >::iterator it=inmemory_queue.begin(); it!=inmemory_queue.end(); ++it){
 		filename = "../../infile/" + it->first + ".temporary.txt";
 		while (!it->second.empty()) {
+			// std::cout << "Iterat" << it->second.front() << std::endl;
 		    file_system_store(filename, it->second.front());
+		    // std::cout << it->second.size() <<std::endl;
 		    it->second.pop();
 		}
 	}
@@ -137,10 +140,9 @@ std::map<std::string, std::queue<std::string> > MessageQueue::inmemory_queue_dae
 	std::string S;
 	std::string filename = "../../infile/" + channel + ".txt";
 	std::ifstream fs(filename);
-
-	while (fs >> S) {
+	while(getline(fs, S)) {
     	inmemory_queue[channel].push(S);
-	}
+    }
 	return inmemory_queue;
 }
 
