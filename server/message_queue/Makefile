@@ -1,6 +1,6 @@
 CC			= g++
 CFLAGS		= -c -Wall
-LDFLAGS		= 
+LDFLAGS		=
 SOURCES		= main.cpp queue.cpp
 INCLUDES	= -I.
 OBJECTS		= $(SOURCES:.cpp=.o)

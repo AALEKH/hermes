@@ -1,6 +1,6 @@
 CC		= g++
 CFLAGS		= -c -Wall -std=c++11
-LDFLAGS		= -lpthread
+LDFLAGS		= -lpthread  -lboost_system -lboost_filesystem
 SOURCES		= server.cpp ../threads/thread.cpp ../tcpsockets/tcpacceptor.cpp ../tcpsockets/tcpstream.cpp ../message_queue/queue.cpp
 INCLUDES	= -I../threads -I../wqueue -I../tcpsockets -I../message_queue
 OBJECTS		= $(SOURCES:.cpp=.o)
