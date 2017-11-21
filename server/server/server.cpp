@@ -123,14 +123,14 @@ class ConnectionHandler : public Thread
     ConnectionHandler(wqueue<WorkItem*>& queue) : m_queue(queue) {}
 
     void* run() {
-        // Remove 1 item at a time and process it. Blocks if no items are 
-        // available to process.
+
         json object;
         json::string_t value;
         std::string return_message;
         const char *s1;
         json j;
         MessageQueue* que = new MessageQueue();
+        que->load_map();
         for (int i = 0;; i++) {
             printf("thread %lu, loop %d - waiting for item...\n", 
                    (long unsigned int)self(), i);
@@ -139,8 +139,7 @@ class ConnectionHandler : public Thread
                    (long unsigned int)self(), i);
             TCPStream* stream = item->getStream();
 
-            // Echo messages back the client until the connection is 
-            // closed
+
             char input[2048];
             int len;
             while ((len = stream->receive(input, sizeof(input)-1)) > 0 ) {
@@ -160,16 +159,11 @@ class ConnectionHandler : public Thread
                 std::string message = j3["message"][0].dump();
 
                 if(que->select_operation(operation)) {
-                    // std::cout << "Select Operation One" << channel << message << std::endl;
                     que->insert_message_to_queue(channel, message);
                     return_message = "Successfully Inserted";
                 } else {
-                    // std::cout << "Select Operation Two" << std::endl;
                     return_message = que->get_Element(channel);
                 }
-
-                // json j2 = json::parse(message);
-                // std::cout << "Key: " << j2["key"].get<std::string>() << " Value: " << j2["value"].get<std::string>() << " Just printed this !! " << std::endl;
                 memset(&input[0], 0, sizeof(input)); // Removing elements of array 'input'
                 std::string word = return_message; // get<std::string>() to convert to string type
                 strcpy(input, word.c_str());
@@ -184,6 +178,7 @@ class ConnectionHandler : public Thread
             }
             delete item; 
         }
+        // que->dump_map();
         delete que;
 
         // Should never get here

@@ -135,7 +135,7 @@ void MessageQueue::dump_queue_to_file() {
 std::map<std::string, std::queue<std::string> > MessageQueue::inmemory_queue_daemon(std::string channel) {
 
 	std::string S;
-	std::string filename = channel + ".txt";
+	std::string filename = "../../infile/" + channel + ".txt";
 	std::ifstream fs(filename);
 
 	while (fs >> S) {
